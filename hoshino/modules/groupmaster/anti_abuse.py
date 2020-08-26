@@ -1,4 +1,4 @@
-# TODO: rewrite this
+    # TODO: rewrite this
 
 
 import random
@@ -61,6 +61,7 @@ async def hb_handler(ctx):
 
 '''
 # ============================================ #
+#sv = Service('anti_abuse', help_='拉黑粗鄙之语')
 
 BANNED_WORD = (
     'rbq', 'RBQ', '憨批', '废物', '死妈', '崽种', '傻逼', '傻逼玩意',
@@ -77,7 +78,8 @@ async def ban_word(session):
     elif ctx['message_type'] == 'discuss':
         msg_from += f'@[讨论组:{ctx["discuss_id"]}]'
     hoshino.logger.critical(f'Self: {ctx["self_id"]}, Message {ctx["message_id"]} from {msg_from}: {ctx["message"]}')
-    hoshino.priv.set_block_user(user_id, timedelta(hours=8))
+    hoshino.priv.set_block_user(user_id, timedelta(hours=2))
     pic = R.img(f"chieri{random.randint(1, 4)}.jpg").cqcode
     await session.send(f"不理你啦！バーカー\n{pic}", at_sender=True)
-    await util.silence(session.ctx, 8*60*60)
+    await util.silence(session.ctx, 5*60)
+

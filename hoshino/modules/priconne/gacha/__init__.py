@@ -23,8 +23,8 @@ sv_help = '''
 [切换卡池] 更换模拟卡池
 '''.strip()
 sv = Service('gacha', help_=sv_help, bundle='pcr娱乐')
-jewel_limit = DailyNumberLimiter(6000)
-tenjo_limit = DailyNumberLimiter(1)
+jewel_limit = DailyNumberLimiter(15000)
+tenjo_limit = DailyNumberLimiter(3)
 
 JEWEL_EXCEED_NOTICE = f'您今天已经抽过{jewel_limit.max}钻了，欢迎明早5点后再来！'
 TENJO_EXCEED_NOTICE = f'您今天已经抽过{tenjo_limit.max}张天井券了，欢迎明早5点后再来！'
@@ -83,6 +83,8 @@ async def set_pool(bot, ev: CQEvent):
         name = 'JP'
     elif name in ('混', '混合', 'mix'):
         name = 'MIX'
+    elif name in ('花子', '花', '花花'):
+        name = '花子'
     else:
         await bot.finish(ev, f'未知服务器地区 {POOL_NAME_TIP}', at_sender=True)
     gid = str(ev.group_id)
@@ -111,19 +113,19 @@ async def gacha_1(bot, ev: CQEvent):
     gid = str(ev.group_id)
     gacha = Gacha(_group_pool[gid])
     chara, hiishi = gacha.gacha_one(gacha.up_prob, gacha.s3_prob, gacha.s2_prob)
-    silence_time = hiishi * 60
 
     res = f'{chara.name} {"★"*chara.star}'
     if sv.bot.config.USE_CQPRO:
         res = f'{chara.icon.cqcode} {res}'
-
-    await silence(ev, silence_time)
+    if(hiishi>40):
+        silence_time = hiishi * 5
+        await silence(ev, silence_time)
     await bot.send(ev, f'素敵な仲間が増えますよ！\n{res}', at_sender=True)
 
 
 @sv.on_prefix(gacha_10_aliases, only_to_me=True)
 async def gacha_10(bot, ev: CQEvent):
-    SUPER_LUCKY_LINE = 170
+    SUPER_LUCKY_LINE = 100
 
     await check_jewel_num(bot, ev)
     jewel_limit.increase(ev.user_id, 1500)
@@ -131,7 +133,7 @@ async def gacha_10(bot, ev: CQEvent):
     gid = str(ev.group_id)
     gacha = Gacha(_group_pool[gid])
     result, hiishi = gacha.gacha_ten()
-    silence_time = hiishi * 6 if hiishi < SUPER_LUCKY_LINE else hiishi * 60
+    #silence_time = hiishi * 6 if hiishi < SUPER_LUCKY_LINE else hiishi * 60
 
     if sv.bot.config.USE_CQPRO:
         res1 = chara.gen_team_pic(result[:5], star_slot_verbose=False)
@@ -152,7 +154,9 @@ async def gacha_10(bot, ev: CQEvent):
     if hiishi >= SUPER_LUCKY_LINE:
         await bot.send(ev, '恭喜海豹！おめでとうございます！')
     await bot.send(ev, f'素敵な仲間が増えますよ！\n{res}\n', at_sender=True)
-    await silence(ev, silence_time)
+    if(hiishi > SUPER_LUCKY_LINE ):
+        silence_time = hiishi*5
+        await silence(ev, silence_time)
 
 
 @sv.on_prefix(gacha_300_aliases, only_to_me=True)
@@ -215,8 +219,9 @@ async def gacha_300(bot, ev: CQEvent):
         msg.append("记忆碎片一大堆！您是托吧？")
 
     await bot.send(ev, '\n'.join(msg), at_sender=True)
-    silence_time = (100*up + 50*(up+s3) + 10*s2 + s1) * 1
-    await silence(ev, silence_time)
+    if((result['first_up_pos']<50)|((up+s3)>8)):
+        silence_time = (60*up + 20*(up+s3)) * 1+(100-result['first_up_pos'])*8
+        await silence(ev, silence_time)
 
 
 @sv.on_prefix('氪金')

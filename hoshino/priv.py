@@ -29,6 +29,13 @@ def set_block_user(user_id, time):
     if user_id not in hoshino.config.SUPERUSERS:
         _black_user[user_id] = datetime.now() + time
 
+def forgive_block_user(user_id, time):
+    if user_id in _black_user:
+        _black_user[user_id] = datetime.now() + time
+        return True
+    else:
+        return False
+
 
 def check_block_group(group_id):
     if group_id in _black_group and datetime.now() > _black_group[group_id]:
@@ -42,6 +49,9 @@ def check_block_user(user_id):
         del _black_user[user_id]  # 拉黑时间过期
         return False
     return bool(user_id in _black_user)
+
+def return_block_user():
+    return(_black_user)
 
 
 #========================================================#

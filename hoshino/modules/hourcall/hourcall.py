@@ -1,7 +1,7 @@
 import pytz
 from datetime import datetime
 import hoshino
-from hoshino import Service
+from hoshino import Service, R
 
 sv = Service('hourcall', enable_on_default=False, help_='时报')
 tz = pytz.timezone('Asia/Shanghai')
@@ -21,4 +21,9 @@ async def hour_call():
     if 2 <= now.hour <= 4:
         return  # 宵禁 免打扰
     msg = get_hour_call()[now.hour]
-    await sv.broadcast(msg, 'hourcall', 0)
+    if(msg == 'maiyao'):
+        pic= R.img('biaoqing/maiyao.jpg').cqcode
+        await sv.broadcast(f'{pic}', 'hourcall', 0)
+    elif(msg == 'shuijiao'):
+        pic= R.img('biaoqing/shuijiao.jpg').cqcode
+        await sv.broadcast(f'{pic}', 'hourcall', 0)

@@ -33,9 +33,13 @@ class PrefixTrigger(BaseTrigger):
 
     def find_handler(self, event: CQEvent):
         first_msg_seg = event.message[0]
-        if first_msg_seg.type != 'text':
+        #if first_msg_seg.type != 'text':
+        if ((first_msg_seg.type != 'text')&(first_msg_seg.type != 'image')):
             return None
-        first_text = first_msg_seg.data['text'].lstrip()
+        if (first_msg_seg.type == 'text'):
+            first_text = first_msg_seg.data['text'].lstrip()
+        if (first_msg_seg.type == 'image'):
+            first_text = first_msg_seg.data['file'].lstrip()
         item = self.trie.longest_prefix(first_text)
         if not item:
             return None
